@@ -1,1 +1,1 @@
-# Learn-Solidity-Blockchain_Development-Smart_Contracts-Full-Course
+# Blockchain Developer, Solidity, Foundry Full Course 2023
