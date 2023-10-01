@@ -1,0 +1,3 @@
+[submodule "foundry-simple-storagelib/forge-std"]
+        path = foundry-simple-storagelib/forge-std
+        url = https://github.com/foundry-rs/forge-std
