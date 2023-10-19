@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.21;
 
 // pragma solidity ^0.8.0;
 // pragma solidity >=0.8.0 <0.9.0;
 
 contract SimpleStorage {
+    event NewPerson(address sender, string name, uint256 favoriteNumber, uint256 myFavoriteNumber);
+
     uint256 myFavoriteNumber;
 
     struct Person {
@@ -28,5 +30,7 @@ contract SimpleStorage {
     function addPerson(string memory _name, uint256 _favoriteNumber) public {
         listOfPeople.push(Person(_favoriteNumber, _name));
         nameToFavoriteNumber[_name] = _favoriteNumber;
+
+        emit NewPerson(msg.sender, _name, _favoriteNumber, myFavoriteNumber);
     }
 }
