@@ -33,6 +33,17 @@ contract FundMe {
         s_addresToAmountFunded[msg.sender] += msg.value;
     }
 
+    function cheaperWithDraw() public is_owner() {
+        uint256 fundersLenght = s_funders.length; // !!!
+        for (uint i = 0; i < fundersLenght; i++) {
+            address funder = s_funders[i];
+            s_addresToAmountFunded[funder] = 0;
+        }
+        s_funders = new address[](0);
+        (bool callSuccess, ) = payable(msg.sender).call{value: address(this).balance}("");
+        require(callSuccess, "Call failed");
+    }
+
     function withdraw() public is_owner {
         for (uint i = 0; i < s_funders.length; i++) {
             address funder = s_funders[i];

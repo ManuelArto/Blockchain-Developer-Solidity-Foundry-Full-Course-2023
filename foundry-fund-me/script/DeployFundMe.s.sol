@@ -7,9 +7,9 @@ import {HelperConfig} from "./HelperConfig.s.sol";
 
 contract DeployFundMe is Script {
 
-    function run() external returns (FundMe fundMe) {
+    function run() external returns (FundMe fundMe, HelperConfig helperConfig) {
         // Before startBroadcast => not a reat tx
-        HelperConfig helperConfig = new HelperConfig();
+        helperConfig = new HelperConfig();
         address ethUsdPriceeFeed = helperConfig.activeNetworkConfig();
         
         // After startBroadcast => reat tx
