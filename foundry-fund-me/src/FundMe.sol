@@ -8,16 +8,17 @@ error FundMe_NotOwner();
 
 contract FundMe {
     using PriceConverter for uint256;
+    AggregatorV3Interface private s_priceFeed;
 
-    uint256 public constant MINIMUM_EUR = 5e18;
+    uint256 public constant MINIMUM_USD = 5e18;
+    address private immutable i_owner;
 
-    address[] public funders;
-    mapping(address => uint256) public addresToAmountFunded; 
+    address[] private s_funders;
+    mapping(address => uint256) private s_addresToAmountFunded; 
 
-    address public immutable i_owner;
-
-    constructor() {
+    constructor(address priceFeed) { // Sepolia => 0x694AA1769357215DE4FAC081bf1f309aDC325306
         i_owner = msg.sender;
+        s_priceFeed = AggregatorV3Interface(priceFeed);
     }
 
     modifier is_owner() {
@@ -27,18 +28,18 @@ contract FundMe {
     }
 
     function fund() public payable {
-        require(msg.value.getConversionRate() >= MINIMUM_EUR, "Money must be greater then 5"); // 1e18 = 1 ETH
-        funders.push(msg.sender);
-        addresToAmountFunded[msg.sender] += msg.value;
+        require(msg.value.getConversionRate(s_priceFeed) >= MINIMUM_USD, "Money must be greater then 5"); // 1e18 = 1 ETH
+        s_funders.push(msg.sender);
+        s_addresToAmountFunded[msg.sender] += msg.value;
     }
 
     function withdraw() public is_owner {
-        for (uint i = 0; i < funders.length; i++) {
-            address funder = funders[i];
-            addresToAmountFunded[funder] = 0;
+        for (uint i = 0; i < s_funders.length; i++) {
+            address funder = s_funders[i];
+            s_addresToAmountFunded[funder] = 0;
         }
         // reset the array
-        funders = new address[](0);
+        s_funders = new address[](0);
 
         // transfer
         // payable(msg.sender).transfer(address(this).balance);
@@ -50,6 +51,10 @@ contract FundMe {
         // call
         (bool callSuccess, ) = payable(msg.sender).call{value: address(this).balance}("");
         require(callSuccess, "Call failed");
+    }
+
+    function getVersion() public view returns (uint256) {
+        return PriceConverter.getVersion(s_priceFeed);
     }
 
     // What happen if someone sends this contract ETH without using fund() function?
@@ -81,6 +86,22 @@ receive() exists?  fallback()
 
     function getBalance() public view returns (uint) {
         return address(this).balance;
+    }
+
+    /**
+     * View / Pure functions (Getter)
+     */
+
+    function getAddresToAmountFunded(address fundingAddress) external view returns (uint256) {
+        return s_addresToAmountFunded[fundingAddress];
+    }
+
+    function getFunder(uint256 index) public view returns (address) {
+        return s_funders[index];
+    }
+
+    function getOwner() public view returns (address) {
+        return i_owner;
     }
 
 }
